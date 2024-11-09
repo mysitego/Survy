@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استبيان الموظفين التفاعلي</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        h1::after {
+            content: '📝';
+            position: absolute;
+            right: -40px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #34495e;
+            font-weight: bold;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        .question {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            transition: all 0.3s ease;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .option {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            border: 2px solid #eee;
+        }
+
+        .option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .option.selected {
+            border-color: #3498db;
+            background: #ebf5fb;
+        }
+
+        .option-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        button::after {
+            content: '→';
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: right 0.3s ease;
+        }
+
+        button:hover::after {
+            right: 20px;
+        }
+
+        .error {
+            color: #e74c3c;
+            margin-top: 5px;
+            font-size: 14px;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .success {
+            color: #27ae60;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .success-icon {
+            font-size: 60px;
+            animation: bounce 1s ease infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loading::after {
+            content: '⌛';
+            animation: rotate 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>استبيان الموظفين</h1>
+        
+        <div id="employeeIdSection">
+            <div class="form-group">
+                <label for="employeeId">الرقم الوظيفي:</label>
+                <input type="number" id="employeeId" required>
+                <div class="error" id="idError"></div>
+            </div>
+            <button onclick="verifyEmployee()">بدء الاستبيان</button>
+        </div>
+
+        <div id="questionsSection" style="display: none;">
+            <div class="question">
+                <label>1. ما هو تقييمك لبيئة العمل؟</label>
+                <div class="options">
+                    <label class="option" onclick="selectOption('q1', 'ممتاز', this)">
+                        <span class="option-icon">🌟</span>
+                        <input type="radio" name="q1" value="ممتاز" hidden> ممتاز
+                    </label>
+                    <label class="option" onclick="selectOption('q1', 'جيد جداً', this)">
+                        <span class="option-icon">😊</span>
+                        <input type="radio" name="q1" value="جيد جداً" hidden> جيد جداً
+                    </label>
+                    <label class="option" onclick="selectOption('q1', 'جيد', this)">
+                        <span class="option-icon">👍</span>
+                        <input type="radio" name="q1" value="جيد" hidden> جيد
+                    </label>
+                    <label class="option" onclick="selectOption('q1', 'مقبول', this)">
+                        <span class="option-icon">😐</span>
+                        <input type="radio" name="q1" value="مقبول" hidden> مقبول
+                    </label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>2. هل أنت راضٍ عن ساعات العمل الحالية؟</label>
+                <div class="options">
+                    <label class="option" onclick="selectOption('q2', 'راضٍ جداً', this)">
+                        <span class="option-icon">🎯</span>
+                        <input type="radio" name="q2" value="راضٍ جداً" hidden> راضٍ جداً
+                    </label>
+                    <label class="option" onclick="selectOption('q2', 'راضٍ', this)">
+                        <span class="option-icon">✅</span>
+                        <input type="radio" name="q2" value="راضٍ" hidden> راضٍ
+                    </label>
+                    <label class="option" onclick="selectOption('q2', 'غير راضٍ', this)">
+                        <span class="option-icon">❌</span>
+                        <input type="radio" name="q2" value="غير راضٍ" hidden> غير راضٍ
+                    </label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>3. كيف تقيم التواصل مع المدراء المباشرين؟</label>
+                <div class="options">
+                    <label class="option" onclick="selectOption('q3', 'ممتاز', this)">
+                        <span class="option-icon">🤝</span>
+                        <input type="radio" name="q3" value="ممتاز" hidden> ممتاز
+                    </label>
+                    <label class="option" onclick="selectOption('q3', 'جيد', this)">
+                        <span class="option-icon">💬</span>
+                        <input type="radio" name="q3" value="جيد" hidden> جيد
+                    </label>
+                    <label class="option" onclick="selectOption('q3', 'يحتاج تحسين', this)">
+                        <span class="option-icon">📈</span>
+                        <input type="radio" name="q3" value="يحتاج تحسين" hidden> يحتاج تحسين
+                    </label>
+                </div>
+            </div>
+
+            <button onclick="submitSurvey()">إرسال الاستبيان</button>
+            <div id="loading" class="loading"></div>
+        </div>
+    </div>
+
+    <script>
+        const completedEmployees = new Set();
+        const adminEmail = 'dghbas77@gmail.com';
+
+        function selectOption(questionName, value, element) {
+            // إزالة التحديد من جميع الخيارات في نفس السؤال
+            const options = element.parentElement.getElementsByClassName('option');
+            Array.from(options).forEach(opt => opt.classList.remove('selected'));
+            
+            // تحديد الخيار المختار
+            element.classList.add('selected');
+            
+            // تحديد زر الراديو
+            const radio = element.querySelector('input[type="radio"]');
+            radio.checked = true;
+        }
+
+        function verifyEmployee() {
+            const employeeId = document.getElementById('employeeId').value;
+            const errorDiv = document.getElementById('idError');
+            
+            if (!employeeId) {
+                errorDiv.textContent = 'الرجاء إدخال الرقم الوظيفي';
+                return;
+            }
+
+            if (completedEmployees.has(employeeId)) {
+                errorDiv.textContent = 'لقد قمت بالإجابة على الاستبيان مسبقاً';
+                return;
+            }
+
+            document.getElementById('employeeIdSection').style.display = 'none';
+            document.getElementById('questionsSection').style.display = 'block';
+            document.querySelectorAll('.question').forEach(q => q.style.display = 'block');
+        }
+
+        function submitSurvey() {
+            const employeeId = document.getElementById('employeeId').value;
+            const loading = document.getElementById('loading');
+            let answers = {
+                employeeId: employeeId,
+                q1: getSelectedValue('q1'),
+                q2: getSelectedValue('q2'),
+                q3: getSelectedValue('q3')
+            };
+
+            if (!answers.q1 || !answers.q2 || !answers.q3) {
+                alert('الرجاء الإجابة على جميع الأسئلة');
+                return;
+            }
+
+            loading.style.display = 'block';
+
+            completedEmployees.add(employeeId);
+            
+            // محاكاة إرسال البريد الإلكتروني
+            setTimeout(() => {
+                loading.style.display = 'none';
+                document.getElementById('questionsSection').innerHTML = `
+                    <div class="success">
+                        <span class="success-icon">✅</span>
+                        شكراً لك! تم إرسال إجاباتك بنجاح.
+                    </div>`;
+                
+                // في بيئة حقيقية، ستحتاج إلى إعداد خادم للتعامل مع إرسال البريد الإلكتروني
+                console.log('تم إرسال الإجابات إلى:', adminEmail);
+                console.log('الإجابات:', answers);
+            }, 2000);
+        }
+
+        function getSelectedValue(name) {
+            const radio = document.querySelector(`input[name="${name}"]:checked`);
+            return radio ? radio.value : null;
+        }
+    </script>
+</body>
+</html>
